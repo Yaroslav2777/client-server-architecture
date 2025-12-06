@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простий HTTP Клієнт</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 { text-align: center; color: #333; }
+        
+        .section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover { background-color: #0056b3; }
+        
+        input {
+            width: calc(100% - 22px); 
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #result-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            min-height: 50px;
+            white-space: pre-wrap; 
+            font-family: monospace;
+            border: 1px solid #ced4da;
+        }
+
+        .label { font-weight: bold; margin-bottom: 5px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>HTTP Клієнт</h1>
+
+        <div class="section">
+            <span class="label">Перевірка зв'язку:</span>
+            <button onclick="sendRequest('/')">Отримати привітання (GET /)</button>
+            <button onclick="sendRequest('/status')">Перевірити статус (GET /status)</button>
+        </div>
+
+        <div class="section">
+            <span class="label">Відправка даних (POST /data):</span>
+            <input type="text" id="name" placeholder="Ім'я (напр. Alice)" value="Alice">
+            <input type="number" id="age" placeholder="Вік (напр. 25)" value="25">
+            <button onclick="sendPostData()">Відправити JSON</button>
+        </div>
+
+        <!-- Блок результату -->
+        <div>
+            <span class="label">Результат останнього запиту:</span>
+            <div id="result-box">Тут з'явиться відповідь сервера...</div>
+        </div>
+    </div>
+
+    <script>
+        const SERVER_URL = 'http://localhost:3000';
+        const resultBox = document.getElementById('result-box');
+
+        async function sendRequest(route) {
+            resultBox.innerText = "Завантаження...";
+            try {
+                const response = await fetch(SERVER_URL + route);
+                
+                if (route === '/') {
+                    const text = await response.text();
+                    resultBox.innerText = text;
+                } else {
+                    const data = await response.json();
+                    resultBox.innerText = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultBox.innerText = "Помилка: " + error.message;
+            }
+        }
+
+        async function sendPostData() {
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            resultBox.innerText = "Відправка...";
+
+            try {
+                const response = await fetch(SERVER_URL + '/data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, age })
+                });
+
+                const data = await response.json();
+                resultBox.innerText = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultBox.innerText = "Помилка: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
